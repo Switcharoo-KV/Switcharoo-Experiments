@@ -5,7 +5,7 @@ This repository contains the evaluation scripts used to measure Switcharoo perfo
 
 This repository contains:
 - `generator`: [FastClick](https://github.com/tbarbette/fastclick) elements and scripts used to generate traffic towards a Tofino switch;
-- `switcharoo_mcast`: P4 program that takes incoming packets, manipulates their flow tuple to generate synthetic flows using some configuration paramters and multicast them towards Switcharoo;
+- `switcharoo_mcast`: P4 program that takes incoming packets, manipulates their flow tuple to generate synthetic flows using some configuration parameters and multicasts them towards Switcharoo;
 - `tests`: evaluation scripts and results plotter.
 
 The experiments require two Tofino switches and an external server that acts as a traffic generator and measurements gatherer.
