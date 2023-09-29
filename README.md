@@ -131,11 +131,13 @@ After configuring the project, you can run all the experiments by typing the fol
 sh run_all_experiments.sh
 ```
 
-You can also run a single experiment by running the specific `run_experiment_*.sh` file. Check the content of the file for the specific parameters to pass.
+You can also run a single experiment by running the specific `run_experiment_*.sh` file. 
+
+Check the content of the file for the specific parameters to pass.
 
 ## Plotting the results
 
 After you gathered all the results, you can plot them by running the following command:
 ```bash
-python3 plot.py <table_size_results> <bloom_size_results> <throughput_results> <figures_path>
+python3 plot.py <table_size_results_path> <bloom_size_results_path> <throughput_results_path> <figures_path>
 ```
