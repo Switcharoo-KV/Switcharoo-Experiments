@@ -194,9 +194,6 @@ def plot_swaps_table_size_figure(results_path):
         swaps = parse_tofino32p_logs(directory, "SWAPS")
 
         for size, results in sorted(swaps.items(), key=lambda item: int(item[0])):
-            if size in [128, 256, 512]:
-                continue
-
             values = []
             for idx, value in enumerate(results):
                 if value:
@@ -235,9 +232,6 @@ def plot_swaps_insertions_table_size_figure(results_path):
         insertions = parse_tofino32p_logs(directory, "INSERTIONS")
 
         for size, results in sorted(swaps.items(), key=lambda item: int(item[0])):
-            if size in [128, 256, 512]:
-                continue
-
             values = []
             for idx, value in enumerate(results):
                 if value:
@@ -280,9 +274,6 @@ def plot_swaps_inputpkts_table_size_figure(results_path):
         input_pkts = parse_tofino32p_logs(directory, "INPUT_PKTS")
 
         for size, results in sorted(swaps.items(), key=lambda item: int(item[0])):
-            if size in [128, 256, 512]:
-                continue
-
             values = []
             for idx, value in enumerate(results):
                 if value:
@@ -323,9 +314,6 @@ def plot_swaps_throughput_table_size_figure(results_path):
                                      key=lambda i: i[1]):
             swaps = parse_tofino32p_logs(os.path.join(directory, folder), "SWAPS")
             for size, results in sorted(swaps.items(), key=lambda item: int(item[0])):
-                if size in [128, 256, 512]:
-                    continue
-
                 values = []
                 for result in results:
                     if result:
@@ -367,9 +355,6 @@ def plot_recirculation_bandwidth_table_size_figure(results_path):
         recirc_bps = parse_tofino32p_logs(directory, "RECIRC_BPS")
 
         for size, results in sorted(recirc_bps.items(), key=lambda item: int(item[0])):
-            if size in [128, 256, 512]:
-                continue
-
             values = []
             for result in results:
                 if result:
@@ -408,9 +393,6 @@ def plot_ips_table_size_figure(results_path):
         to_plot = {'x': [], 'y': [], 'dy': []}
         ips = parse_tofino32p_logs(directory, "IPS")
         for size, results in sorted(ips.items(), key=lambda item: int(item[0])):
-            if size in [128, 256, 512]:
-                continue
-
             values = []
             for result in results:
                 if result:
@@ -450,9 +432,6 @@ def plot_insertions_table_size_figure(results_path):
         to_plot = {'x': [], 'y': [], 'dy': []}
         insertions = parse_tofino32p_logs(directory, "INSERTIONS")
         for size, results in sorted(insertions.items(), key=lambda item: int(item[0])):
-            if size in [128, 256, 512]:
-                continue
-
             values = []
             for result in results:
                 if result:
@@ -568,9 +547,6 @@ def plot_latency_table_size_line(directory, percentile, color, marker, label, er
     to_plot = {'x': [], 'y': [], 'dy': []}
     latencies = parse_fastclick_logs(directory)[percentile]
     for size, results in sorted(latencies.items(), key=lambda item: int(item[0])):
-        if size in [128, 256, 512]:
-            continue
-
         if results:
             to_plot['x'].append(size)
             to_plot['y'].append(statistics.mean(results))
@@ -642,9 +618,6 @@ def plot_expired_table_size_figure(results_path, table_number):
         expired_2 = parse_tofino32p_logs(directory, "EXPIRED_2")
 
         for size, results in sorted(expired_1.items(), key=lambda item: int(item[0])):
-            if size in [128, 256, 512]:
-                continue
-
             values = []
             for idx, value in enumerate(results):
                 if value:
@@ -719,9 +692,6 @@ def plot_drops_tm_table_size_figure(results_path):
         ig_drops = parse_tofino32p_logs(directory, "IG_DROP")
         eg_drops = parse_tofino32p_logs(directory, "EG_DROP")
         for size, results in sorted(ig_drops.items(), key=lambda item: int(item[0])):
-            if size in [128, 256, 512]:
-                continue
-
             values = []
             for idx, result in enumerate(results):
                 val = 0
@@ -761,9 +731,6 @@ def plot_drops_wire_table_size_figure(results_path):
         input_pkts = parse_tofino32p_logs(directory, "INPUT_PKTS")
         output_pkts = parse_tofino32p_logs(directory, "OUTPUT_PKTS")
         for size, results in sorted(input_pkts.items(), key=lambda item: int(item[0])):
-            if size in [128, 256, 512]:
-                continue
-
             values = []
             for idx, result in enumerate(results):
                 val = result[-1][1]
@@ -840,9 +807,6 @@ def plot_swaps_bloom_size_figure(results_path):
         to_plot = {'x': [], 'y': [], 'dy': []}
 
         for size in sorted(map(lambda i: int(i), filter(lambda i: not i.startswith("."), os.listdir(directory)))):
-            if size in [128, 256, 512]:
-                continue
-
             swaps_results = parse_tofino32p_logs(os.path.join(directory, str(size)), "SWAPS")[32768]
             values = []
             for results in swaps_results:
@@ -880,9 +844,6 @@ def plot_recirculation_bandwidth_bloom_size_figure(results_path):
         to_plot = {'x': [], 'y': [], 'dy': []}
 
         for size in sorted(map(lambda i: int(i), filter(lambda i: not i.startswith("."), os.listdir(directory)))):
-            if size in [128, 256, 512]:
-                continue
-
             recirc_bps = parse_tofino32p_logs(os.path.join(directory, str(size)), "RECIRC_BPS")[32768]
             
             values = []

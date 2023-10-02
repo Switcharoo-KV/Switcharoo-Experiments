@@ -38,7 +38,7 @@ echo "  Output Directory: $path" >> log.txt
 echo "  Traffic Pattern Configuration: $configuration" >> log.txt
 echo "  Generator Rate: $rate" >> log.txt
 echo "  Table Size: 32768" >> log.txt
-echo "  Bloom Size: [128, 65536]" >> log.txt
+echo "  Bloom Size: [1024, 65536]" >> log.txt
 
 echo "$(date +'%m-%d-%y-%T') - Deleting logs from `$SWITCHAROO_TOFINO_NAME`..." >> log.txt
 sshpass -p $TOFINO_USER_PASS ssh $TOFINO_USERNAME@$SWITCHAROO_TOFINO_NAME "sudo rm -rf $SWITCHAROO_PATH/logs/*"
@@ -49,7 +49,7 @@ sshpass -p $TOFINO_USER_PASS ssh $TOFINO_USERNAME@$MCAST_TOFINO_NAME "sudo rm -r
 echo "$(date +'%m-%d-%y-%T') - Deleting fastclick logs from `$GENERATOR_SERVER_NAME`..." >> log.txt
 sshpass -p $SERVER_USER_PASS ssh $SERVER_USERNAME@$GENERATOR_SERVER_NAME "echo $SERVER_USER_PASS | sudo -S rm -rf $GENERATOR_PATH/logs/*"
 
-for size in 128 256 512 1024 2048 4096 8192 16384 32768 65536
+for size in 1024 2048 4096 8192 16384 32768 65536
 do  
     echo "$(date +'%m-%d-%y-%T') - Cleaning processes..." >> log.txt
     sshpass -p $TOFINO_USER_PASS ssh $TOFINO_USERNAME@$SWITCHAROO_TOFINO_NAME -t "killall -9 run_switchd.sh; killall -9 run_bfshell.sh; killall -9 bfshell; sudo pkill -9 -f 'bf_switchd'"

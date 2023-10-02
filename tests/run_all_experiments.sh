@@ -136,3 +136,10 @@ sh run_experiment_bloomsize.sh -p all-bloomsize/ -c avg -r 2600000
 sleep 5
 sh run_experiment_bloomsize.sh -p all-bloomsize/ -c best -r 2600000
 sleep 5
+
+sh run_experiment_expiration.sh -p all-expirations/ -c worst -r 2600000
+sleep 5
+sh run_experiment_expiration.sh -p all-expirations/ -c avg -r 2600000
+sleep 5
+sh run_experiment_expiration.sh -p all-expirations/ -c best -r 2600000
+sleep 5
