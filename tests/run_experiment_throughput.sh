@@ -118,13 +118,13 @@ mkdir -p $path/$configuration/$rate-$mcast/mcast-logs
 mkdir -p $path/$configuration/$rate-$mcast/fastclick-logs
 
 echo "Copying `$SWITCHAROO_TOFINO_NAME` logs in $path/$configuration/$rate-$mcast" >> log.txt
-sshpass -p $TOFINO_USER_PASS scp -r $TOFINO_USERNAME@$SWITCHAROO_TOFINO_NAME:$SWITCHAROO_PATH/logs/* $path/$configuration/$rate-$mcast/`$SWITCHAROO_TOFINO_NAME`-logs
+sshpass -p $TOFINO_USER_PASS scp -r $TOFINO_USERNAME@$SWITCHAROO_TOFINO_NAME:$SWITCHAROO_PATH/logs/* $path/$configuration/$rate-$mcast/switcharoo-logs
 
 echo "Deleting logs from `$SWITCHAROO_TOFINO_NAME`..." >> log.txt
 sshpass -p $TOFINO_USER_PASS ssh $TOFINO_USERNAME@$SWITCHAROO_TOFINO_NAME "sudo rm -rf $SWITCHAROO_PATH/logs/*"
 
 echo "Copying `$MCAST_TOFINO_NAME` logs in $path/$configuration/$rate-$mcast" >> log.txt
-sshpass -p $TOFINO_USER_PASS scp -r $TOFINO_USERNAME@$MCAST_TOFINO_NAME:$MULTICAST_PATH/logs/* $path/$configuration/$rate-$mcast/`$MCAST_TOFINO_NAME`-logs
+sshpass -p $TOFINO_USER_PASS scp -r $TOFINO_USERNAME@$MCAST_TOFINO_NAME:$MULTICAST_PATH/logs/* $path/$configuration/$rate-$mcast/mcast-logs
 
 echo "Deleting logs from `$MCAST_TOFINO_NAME`..." >> log.txt
 sshpass -p $TOFINO_USER_PASS ssh $TOFINO_USERNAME@$MCAST_TOFINO_NAME "sudo rm -rf $MULTICAST_PATH/logs/*"

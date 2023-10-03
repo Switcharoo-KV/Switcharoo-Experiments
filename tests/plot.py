@@ -1,12 +1,11 @@
-import os
-import statistics
-import sys
-from distutils.util import strtobool
-
 import matplotlib
 import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
 import numpy as np
+import os
+import statistics
+import sys
+from distutils.util import strtobool
 
 figures_path = "figures"
 
@@ -189,7 +188,7 @@ def parse_fastclick_logs(directory):
 def plot_swaps_table_size_figure(results_path):
     global figures_path
 
-    def plot_swaps_table_size_line(directory, color, label, errorbar_color):
+    def plot_swaps_table_size_line(directory, color, marker, label, errorbar_color):
         to_plot = {'x': [], 'y': [], 'dy': []}
         swaps = parse_tofino32p_logs(directory, "SWAPS")
 
@@ -203,16 +202,18 @@ def plot_swaps_table_size_figure(results_path):
             to_plot['y'].append(statistics.mean(values) if values else 0)
             to_plot['dy'].append(statistics.stdev(values) if values else 0)
 
-        plt.plot(to_plot['x'], to_plot['y'], label=label, linestyle='dashed', fillstyle='none', color=color, marker='o')
+        plt.plot(
+            to_plot['x'], to_plot['y'], label=label, linestyle='dashed', fillstyle='none', color=color, marker=marker
+        )
 
         for idx, x in enumerate(to_plot['x']):
             plt.errorbar(x, to_plot['y'][idx], yerr=to_plot['dy'][idx], color=errorbar_color, elinewidth=1, capsize=1)
 
     plt.clf()
     ax = plt.gca()
-    plot_swaps_table_size_line(os.path.join(results_path, "avg"), 'royalblue', "avg", "blue")
-    plot_swaps_table_size_line(os.path.join(results_path, "worst"), 'red', "worst", "darkred")
-    plot_swaps_table_size_line(os.path.join(results_path, "best"), 'green', "best", "darkgreen")
+    plot_swaps_table_size_line(os.path.join(results_path, "worst"), 'red', "o", "1-Pkt Flows", "darkred")
+    plot_swaps_table_size_line(os.path.join(results_path, "avg"), 'blue', "^", "2-Pkt Flows", "darkblue")
+    plot_swaps_table_size_line(os.path.join(results_path, "best"), 'green', "s", "8-Pkt Flows", "darkgreen")
 
     ax.yaxis.set_major_formatter(OOMFormatter(8, "%.2f"))
     set_x_axis_table_size()
@@ -243,7 +244,8 @@ def plot_swaps_insertions_table_size_figure(results_path):
             to_plot['y'].append(statistics.mean(values) if values else 0)
             to_plot['dy'].append(statistics.stdev(values) if values else 0)
 
-        plt.plot(to_plot['x'], to_plot['y'], label=label, linestyle='dashed', fillstyle='none', color=color, marker=marker)
+        plt.plot(to_plot['x'], to_plot['y'], label=label, linestyle='dashed', fillstyle='none', color=color,
+                 marker=marker)
 
         for idx, x in enumerate(to_plot['x']):
             plt.errorbar(x, to_plot['y'][idx], yerr=to_plot['dy'][idx], color=errorbar_color, elinewidth=1, capsize=1)
@@ -268,7 +270,7 @@ def plot_swaps_insertions_table_size_figure(results_path):
 def plot_swaps_inputpkts_table_size_figure(results_path):
     global figures_path
 
-    def plot_swaps_inputpkts_table_size_line(directory, color, label, errorbar_color):
+    def plot_swaps_inputpkts_table_size_line(directory, color, marker, label, errorbar_color):
         to_plot = {'x': [], 'y': [], 'dy': []}
         swaps = parse_tofino32p_logs(directory, "SWAPS")
         input_pkts = parse_tofino32p_logs(directory, "INPUT_PKTS")
@@ -285,16 +287,18 @@ def plot_swaps_inputpkts_table_size_figure(results_path):
             to_plot['y'].append(statistics.mean(values) if values else 0)
             to_plot['dy'].append(statistics.stdev(values) if values else 0)
 
-        plt.plot(to_plot['x'], to_plot['y'], label=label, linestyle='dashed', fillstyle='none', color=color, marker='o')
+        plt.plot(
+            to_plot['x'], to_plot['y'], label=label, linestyle='dashed', fillstyle='none', color=color, marker=marker
+        )
 
         for idx, x in enumerate(to_plot['x']):
             plt.errorbar(x, to_plot['y'][idx], yerr=to_plot['dy'][idx], color=errorbar_color, elinewidth=1, capsize=1)
 
     plt.clf()
     ax = plt.gca()
-    plot_swaps_inputpkts_table_size_line(os.path.join(results_path, "avg"), 'royalblue', "avg", "blue")
-    plot_swaps_inputpkts_table_size_line(os.path.join(results_path, "worst"), 'red', "worst", "darkred")
-    plot_swaps_inputpkts_table_size_line(os.path.join(results_path, "best"), 'green', "best", "darkgreen")
+    plot_swaps_inputpkts_table_size_line(os.path.join(results_path, "worst"), 'red', "o", "1-Pkt Flows", "darkred")
+    plot_swaps_inputpkts_table_size_line(os.path.join(results_path, "avg"), 'blue', "^", "2-Pkt Flows", "darkblue")
+    plot_swaps_inputpkts_table_size_line(os.path.join(results_path, "best"), 'green', "s", "8-Pkt Flows", "darkgreen")
 
     set_x_axis_table_size()
 
@@ -302,49 +306,6 @@ def plot_swaps_inputpkts_table_size_figure(results_path):
     plt.ylabel('Swaps / Total Packets [%]')
     plt.legend(loc='best', labelspacing=0.2, prop={'size': 8})
     plt.savefig(os.path.join(figures_path, "swaps_inputpkts_table_size.pdf"), format="pdf", bbox_inches='tight')
-
-
-def plot_swaps_throughput_table_size_figure(results_path):
-    global figures_path
-
-    def plot_swaps_throughput_table_size_line(directory, color, label, errorbar_color):
-        to_plot = {'x': [], 'y': [], 'dy': []}
-        for (folder, rate) in sorted(map(lambda i: (i, THROUGHPUT_FOLDER_TO_RATE[i]),
-                                         filter(lambda i: not i.startswith("."), os.listdir(directory))),
-                                     key=lambda i: i[1]):
-            swaps = parse_tofino32p_logs(os.path.join(directory, folder), "SWAPS")
-            for size, results in sorted(swaps.items(), key=lambda item: int(item[0])):
-                values = []
-                for result in results:
-                    if result:
-                        values.append(result[-1][1])
-
-                to_plot['x'].append(rate)
-                to_plot['y'].append(0 if not values else statistics.mean(values))
-                to_plot['dy'].append(0 if not values or len(values) < 2 else statistics.stdev(values))
-
-        plt.plot(to_plot['x'], to_plot['y'], label=label, linestyle='dashed', fillstyle='none', color=color, marker='o')
-
-        for idx, x in enumerate(to_plot['x']):
-            plt.errorbar(x, to_plot['y'][idx], yerr=to_plot['dy'][idx], color=errorbar_color, elinewidth=1, capsize=1)
-
-    plt.clf()
-    ax = plt.gca()
-    plot_swaps_throughput_table_size_line(os.path.join(results_path, "avg"), 'royalblue', "avg", "blue")
-    plot_swaps_throughput_table_size_line(os.path.join(results_path, "worst"), 'red', "worst", "darkred")
-    plot_swaps_throughput_table_size_line(os.path.join(results_path, "best"), 'green', "best", "darkgreen")
-
-    plt.yscale('log', base=10)
-    ax.set_ylim([1, 200000])
-    plt.xticks([0, 20, 40, 60, 80, 100,
-                120, 140, 160, 180, 200,
-                220, 240, 260, 280, 300,
-                320, 340, 360, 380, 400, 420], rotation=90)
-
-    plt.xlabel('Throughput [Gbps]')
-    plt.ylabel('N. Swaps')
-    plt.legend(loc='best', labelspacing=0.2, prop={'size': 8})
-    plt.savefig(os.path.join(figures_path, "swaps_throughput_table_size.pdf"), format="pdf", bbox_inches='tight')
 
 
 def plot_recirculation_bandwidth_table_size_figure(results_path):
@@ -365,16 +326,20 @@ def plot_recirculation_bandwidth_table_size_figure(results_path):
             to_plot['y'].append(statistics.mean(values))
             to_plot['dy'].append(statistics.stdev(values))
 
-        plt.plot(to_plot['x'], to_plot['y'], label=label, linestyle='dashed', fillstyle='none', color=color, marker=marker)
+        plt.plot(to_plot['x'], to_plot['y'], label=label, linestyle='dashed', fillstyle='none', color=color,
+                 marker=marker)
 
         for idx, x in enumerate(to_plot['x']):
             plt.errorbar(x, to_plot['y'][idx], yerr=to_plot['dy'][idx], color=errorbar_color, elinewidth=1, capsize=1)
 
     plt.clf()
     ax = plt.gca()
-    plot_recirculation_bandwidth_table_size_line(os.path.join(results_path, "worst"), 'red', "o", "1-Pkt Flows", "darkred")
-    plot_recirculation_bandwidth_table_size_line(os.path.join(results_path, "avg"), 'blue', "^", "2-Pkt Flows", "darkblue")
-    plot_recirculation_bandwidth_table_size_line(os.path.join(results_path, "best"), 'green', "s", "8-Pkt Flows", "darkgreen")
+    plot_recirculation_bandwidth_table_size_line(os.path.join(results_path, "worst"), 'red', "o", "1-Pkt Flows",
+                                                 "darkred")
+    plot_recirculation_bandwidth_table_size_line(os.path.join(results_path, "avg"), 'blue', "^", "2-Pkt Flows",
+                                                 "darkblue")
+    plot_recirculation_bandwidth_table_size_line(os.path.join(results_path, "best"), 'green', "s", "8-Pkt Flows",
+                                                 "darkgreen")
 
     ax.set_ylim([0, 260])
     ax.set_yticks(range(0, 260, 20))
@@ -403,16 +368,17 @@ def plot_ips_table_size_figure(results_path):
             to_plot['y'].append(statistics.mean(values))
             to_plot['dy'].append(statistics.stdev(values))
 
-        plt.plot(to_plot['x'], to_plot['y'], label=label, linestyle='dashed', fillstyle='none', color=color, marker=marker)
+        plt.plot(to_plot['x'], to_plot['y'], label=label, linestyle='dashed', fillstyle='none', color=color,
+                 marker=marker)
 
         for idx, x in enumerate(to_plot['x']):
             plt.errorbar(x, to_plot['y'][idx], yerr=to_plot['dy'][idx], color=errorbar_color, elinewidth=1, capsize=1)
 
     plt.clf()
     ax = plt.gca()
-    plot_ips_table_size_line(os.path.join(results_path, "avg"), 'royalblue', "^", "avg", "blue")
-    plot_ips_table_size_line(os.path.join(results_path, "worst"), 'red', "o", "worst", "darkred")
-    plot_ips_table_size_line(os.path.join(results_path, "best"), 'green', "s", "best", "darkgreen")
+    plot_ips_table_size_line(os.path.join(results_path, "worst"), 'red', "o", "1-Pkt Flows", "darkred")
+    plot_ips_table_size_line(os.path.join(results_path, "avg"), 'royalblue', "^", "2-Pkt Flows", "blue")
+    plot_ips_table_size_line(os.path.join(results_path, "best"), 'green', "s", "8-Pkt Flows", "darkgreen")
 
     ax.yaxis.set_major_formatter(OOMFormatter(6, "%d"))
     ax.set_ylim([0, 13000000])
@@ -428,7 +394,7 @@ def plot_ips_table_size_figure(results_path):
 def plot_insertions_table_size_figure(results_path):
     global figures_path
 
-    def plot_insertions_table_size_line(directory, color, label, errorbar_color):
+    def plot_insertions_table_size_line(directory, color, marker, label, errorbar_color):
         to_plot = {'x': [], 'y': [], 'dy': []}
         insertions = parse_tofino32p_logs(directory, "INSERTIONS")
         for size, results in sorted(insertions.items(), key=lambda item: int(item[0])):
@@ -448,9 +414,9 @@ def plot_insertions_table_size_figure(results_path):
 
     plt.clf()
     ax = plt.gca()
-    plot_insertions_table_size_line(os.path.join(results_path, "avg"), 'royalblue', "avg", "blue")
-    plot_insertions_table_size_line(os.path.join(results_path, "worst"), 'red', "worst", "darkred")
-    plot_insertions_table_size_line(os.path.join(results_path, "best"), 'green', "best", "darkgreen")
+    plot_insertions_table_size_line(os.path.join(results_path, "worst"), 'red', "o", "1-Pkt Flows", "darkred")
+    plot_insertions_table_size_line(os.path.join(results_path, "avg"), 'royalblue', "^", "2-Pkt Flows", "blue")
+    plot_insertions_table_size_line(os.path.join(results_path, "best"), 'green', "s", "8-Pkt Flows", "darkgreen")
 
     ax.yaxis.set_major_formatter(OOMFormatter(6, "%d"))
     ax.set_ylim([0, 160000000])
@@ -483,7 +449,8 @@ def plot_ips_throughput_figure(results_path):
                 to_plot['y'].append(statistics.mean(values))
                 to_plot['dy'].append(statistics.stdev(values))
 
-        plt.plot(to_plot['x'], to_plot['y'], label=label, linestyle='dashed', fillstyle='none', color=color, marker=marker)
+        plt.plot(to_plot['x'], to_plot['y'], label=label, linestyle='dashed', fillstyle='none', color=color,
+                 marker=marker)
 
         for idx, x in enumerate(to_plot['x']):
             plt.errorbar(x, to_plot['y'][idx], yerr=to_plot['dy'][idx], color=errorbar_color, elinewidth=1, capsize=1)
@@ -532,7 +499,7 @@ def plot_recirculated_packets_figure(results_path, size):
 
     ax.set_xlim([-0.5, 5.5])
     plt.xticks(range(0, 6, 1), labels=["0", "1", "2", "3", "4", "5"])
-    
+
     ax.set_ylim([0.01, 200])
     plt.yscale('log', base=10)
     ax.yaxis.set_major_formatter(ticker.FuncFormatter(lambda y, _: '{:g}'.format(y)))
@@ -590,29 +557,10 @@ def plot_latency_table_size_figure(results_path):
     plt.savefig(os.path.join(figures_path, "latency_99_tablesize.pdf"), format="pdf", bbox_inches='tight')
 
 
-def plot_percentile_latency_table_size_figure(results_path, configuration, label):
-    global figures_path
-
-    results_configuration_path = os.path.join(results_path, configuration)
-
-    plt.clf()
-    plot_latency_table_size_line(results_configuration_path, "LAT50", 'royalblue', f"{label}-50", "blue")
-    plot_latency_table_size_line(results_configuration_path, "LAT90", 'red', f"{label}-90", "darkred")
-    plot_latency_table_size_line(results_configuration_path, "LAT95", 'green', f"{label}-95", "darkgreen")
-    plot_latency_table_size_line(results_configuration_path, "LAT99", 'orange', f"{label}-99", "darkorange")
-
-    set_x_axis_table_size()
-
-    plt.xlabel('N. Cuckoo Table Entries')
-    plt.ylabel('Latency [μs]')
-    plt.legend(loc='best', labelspacing=0.2, prop={'size': 8})
-    plt.savefig(os.path.join(figures_path, f"percentile_tablesize_{label}.pdf"), format="pdf", bbox_inches='tight')
-
-
 def plot_expired_table_size_figure(results_path, table_number):
     global figures_path
 
-    def plot_expired_table_size_line(directory, color, label, errorbar_color):
+    def plot_expired_table_size_line(directory, color, marker, label, errorbar_color):
         to_plot = {'x': [], 'y': [], 'dy': []}
         expired_1 = parse_tofino32p_logs(directory, "EXPIRED_1")
         expired_2 = parse_tofino32p_logs(directory, "EXPIRED_2")
@@ -635,16 +583,18 @@ def plot_expired_table_size_figure(results_path, table_number):
             to_plot['y'].append(statistics.mean(values))
             to_plot['dy'].append(statistics.stdev(values))
 
-        plt.plot(to_plot['x'], to_plot['y'], label=label, linestyle='dashed', fillstyle='none', color=color, marker='o')
+        plt.plot(
+            to_plot['x'], to_plot['y'], label=label, linestyle='dashed', fillstyle='none', color=color, marker=marker
+        )
 
         for idx, x in enumerate(to_plot['x']):
             plt.errorbar(x, to_plot['y'][idx], yerr=to_plot['dy'][idx], color=errorbar_color, elinewidth=1, capsize=1)
 
     plt.clf()
     ax = plt.gca()
-    plot_expired_table_size_line(os.path.join(results_path, "avg"), 'royalblue', "avg", "blue")
-    plot_expired_table_size_line(os.path.join(results_path, "worst"), 'red', "worst", "darkred")
-    plot_expired_table_size_line(os.path.join(results_path, "best"), 'green', "best", "darkgreen")
+    plot_expired_table_size_line(os.path.join(results_path, "worst"), 'red', "o", "1-Pkt Flow", "darkred")
+    plot_expired_table_size_line(os.path.join(results_path, "avg"), 'blue', "^", "2-Pkt Flow ", "darkblue")
+    plot_expired_table_size_line(os.path.join(results_path, "best"), 'green', "s", "8-Pkt Flow", "darkgreen")
 
     ax.yaxis.set_major_formatter(OOMFormatter(6, "%d"))
     set_x_axis_table_size()
@@ -687,7 +637,7 @@ def plot_latency_recirculations_figure(results_path, size):
 
 
 def plot_drops_tm_table_size_figure(results_path):
-    def plot_drops_tm_table_size_line(directory, color, label, errorbar_color):
+    def plot_drops_tm_table_size_line(directory, color, marker, label, errorbar_color):
         to_plot = {'x': [], 'y': [], 'dy': []}
         ig_drops = parse_tofino32p_logs(directory, "IG_DROP")
         eg_drops = parse_tofino32p_logs(directory, "EG_DROP")
@@ -707,15 +657,17 @@ def plot_drops_tm_table_size_figure(results_path):
             to_plot['y'].append(0 if not values else statistics.mean(values))
             to_plot['dy'].append(0 if not values else statistics.stdev(values))
 
-        plt.plot(to_plot['x'], to_plot['y'], label=label, linestyle='dashed', fillstyle='none', color=color, marker='o')
+        plt.plot(
+            to_plot['x'], to_plot['y'], label=label, linestyle='dashed', fillstyle='none', color=color, marker=marker
+        )
 
         for idx, x in enumerate(to_plot['x']):
             plt.errorbar(x, to_plot['y'][idx], yerr=to_plot['dy'][idx], color=errorbar_color, elinewidth=1, capsize=1)
 
     plt.clf()
-    plot_drops_tm_table_size_line(os.path.join(results_path, "avg"), 'royalblue', "avg", "blue")
-    plot_drops_tm_table_size_line(os.path.join(results_path, "worst"), 'red', "worst", "darkred")
-    plot_drops_tm_table_size_line(os.path.join(results_path, "best"), 'green', "best", "darkgreen")
+    plot_drops_tm_table_size_line(os.path.join(results_path, "worst"), 'red', "o", "1-Pkt Flows", "darkred")
+    plot_drops_tm_table_size_line(os.path.join(results_path, "avg"), 'royalblue', "^", "2-Pkt Flows", "blue")
+    plot_drops_tm_table_size_line(os.path.join(results_path, "best"), 'green', "s", "8-Pkt Flows", "darkgreen")
 
     set_x_axis_table_size()
 
@@ -726,7 +678,7 @@ def plot_drops_tm_table_size_figure(results_path):
 
 
 def plot_drops_wire_table_size_figure(results_path):
-    def plot_drops_wire_table_size_line(directory, color, label, errorbar_color):
+    def plot_drops_wire_table_size_line(directory, color, marker, label, errorbar_color):
         to_plot = {'x': [], 'y': [], 'dy': []}
         input_pkts = parse_tofino32p_logs(directory, "INPUT_PKTS")
         output_pkts = parse_tofino32p_logs(directory, "OUTPUT_PKTS")
@@ -742,15 +694,17 @@ def plot_drops_wire_table_size_figure(results_path):
             to_plot['y'].append(0 if not values else statistics.mean(values))
             to_plot['dy'].append(0 if not values else statistics.stdev(values))
 
-        plt.plot(to_plot['x'], to_plot['y'], label=label, linestyle='dashed', fillstyle='none', color=color, marker='o')
+        plt.plot(
+            to_plot['x'], to_plot['y'], label=label, linestyle='dashed', fillstyle='none', color=color, marker=marker
+        )
 
         for idx, x in enumerate(to_plot['x']):
             plt.errorbar(x, to_plot['y'][idx], yerr=to_plot['dy'][idx], color=errorbar_color, elinewidth=1, capsize=1)
 
     plt.clf()
-    plot_drops_wire_table_size_line(os.path.join(results_path, "avg"), 'royalblue', "avg", "blue")
-    plot_drops_wire_table_size_line(os.path.join(results_path, "worst"), 'red', "worst", "darkred")
-    plot_drops_wire_table_size_line(os.path.join(results_path, "best"), 'green', "best", "darkgreen")
+    plot_drops_wire_table_size_line(os.path.join(results_path, "worst"), 'red', "o", "1-Pkt Flows", "darkred")
+    plot_drops_wire_table_size_line(os.path.join(results_path, "avg"), 'royalblue', "^", "2-Pkt Flows", "blue")
+    plot_drops_wire_table_size_line(os.path.join(results_path, "best"), 'green', "s", "8-Pkt Flows", "darkgreen")
 
     set_x_axis_table_size()
 
@@ -760,124 +714,57 @@ def plot_drops_wire_table_size_figure(results_path):
     plt.savefig(os.path.join(figures_path, "drops_wire_table_size.pdf"), format="pdf", bbox_inches='tight')
 
 
-def plot_ips_bloom_size_figure(results_path):
-    global figures_path
-
-    def plot_ips_bloom_size_line(directory, color, label, errorbar_color):
+def plot_outoforder_table_size_figure(results_path, results_no_ordering_path):
+    def plot_outoforder_table_size_line(directory, color, label, errorbar_color):
         to_plot = {'x': [], 'y': [], 'dy': []}
+        outoforder = parse_fastclick_logs(directory)["OUTOFORDER"]
+        output_pkts = parse_tofino32p_logs(directory, "OUTPUT_PKTS")
 
-        for size in sorted(map(lambda i: int(i), filter(lambda i: not i.startswith("."), os.listdir(directory)))):
-            ips_results = parse_tofino32p_logs(os.path.join(directory, str(size)), "IPS")[32768]
-            values = []
-            for results in ips_results:
-                if results:
-                    val = list(map(lambda item: item[1], results))[1:-1]
-                    values.append(statistics.mean(val))
+        for size, results in sorted(outoforder.items(), key=lambda item: int(item[0])):
+            output_pkts_experiment = list(map(lambda x: x[-1][1], output_pkts[size]))
+            results_perc = [] if not results else list(
+                map(lambda x: (x[0] / x[1]) * 100, zip(results, output_pkts_experiment)))
 
             to_plot['x'].append(size)
-            to_plot['y'].append(statistics.mean(values) if values else 0)
-            to_plot['dy'].append(statistics.stdev(values) if len(values) > 1 else 0)
+            to_plot['y'].append(0 if not results_perc else statistics.mean(results_perc))
+            to_plot['dy'].append(0 if not results_perc else statistics.stdev(results_perc))
 
         plt.plot(to_plot['x'], to_plot['y'], label=label, linestyle='dashed', fillstyle='none', color=color, marker='o')
 
         for idx, x in enumerate(to_plot['x']):
             plt.errorbar(x, to_plot['y'][idx], yerr=to_plot['dy'][idx], color=errorbar_color, elinewidth=1, capsize=1)
 
-    plt.clf()
-    ax = plt.gca()
-    plot_ips_bloom_size_line(os.path.join(results_path, "avg"), 'royalblue', "avg", "blue")
-    plot_ips_bloom_size_line(os.path.join(results_path, "worst"), 'red', "worst", "darkred")
-    plot_ips_bloom_size_line(os.path.join(results_path, "best"), 'green', "best", "darkgreen")
-
-    ax.yaxis.set_major_formatter(OOMFormatter(6, "%d"))
-    ax.set_ylim([0, 13000000])
-    plt.yticks(range(0, 13000000, 1000000))
-    set_x_axis_table_size()
-
-    plt.xlabel('N. Bloom Table Entries')
-    plt.ylabel('Insertions per Second')
-    plt.legend(loc=(0.65, 0.50), labelspacing=0.2, prop={'size': 8})
-    plt.savefig(os.path.join(figures_path, "ips_bloom_size.pdf"), format="pdf", bbox_inches='tight')
-
-
-def plot_swaps_bloom_size_figure(results_path):
-    global figures_path
-
-    def plot_swaps_bloom_size_line(directory, color, label, errorbar_color):
+    def plot_outoforder_no_ordering_table_size_line(directory_no_ordering, color, label, errorbar_color):
         to_plot = {'x': [], 'y': [], 'dy': []}
+        outoforder_no_ordering = parse_fastclick_logs(directory_no_ordering)["OUTOFORDER"]
+        output_pkts = parse_tofino32p_logs(directory_no_ordering, "OUTPUT_PKTS")
 
-        for size in sorted(map(lambda i: int(i), filter(lambda i: not i.startswith("."), os.listdir(directory)))):
-            swaps_results = parse_tofino32p_logs(os.path.join(directory, str(size)), "SWAPS")[32768]
-            values = []
-            for results in swaps_results:
-                if results:
-                    val = list(map(lambda item: item[1], results))[1:-1]
-                    values.append(statistics.mean(val))
+        for size, results in sorted(outoforder_no_ordering.items(), key=lambda item: int(item[0])):
+            output_pkts_experiment = list(map(lambda x: x[-1][1], output_pkts[size]))
+            results_perc = [] if not results else list(
+                map(lambda x: (x[0] / x[1]) * 100, zip(results, output_pkts_experiment)))
 
             to_plot['x'].append(size)
-            to_plot['y'].append(statistics.mean(values) if values else 0)
-            to_plot['dy'].append(statistics.stdev(values) if len(values) > 1 else 0)
+            to_plot['y'].append(0 if not results_perc else statistics.mean(results_perc))
+            to_plot['dy'].append(0 if not results_perc else statistics.stdev(results_perc))
 
-        plt.plot(to_plot['x'], to_plot['y'], label=label, linestyle='dashed', fillstyle='none', color=color, marker='o')
+        plt.plot(to_plot['x'], to_plot['y'], label=label, linestyle='dashed', fillstyle='none', color=color, marker='^')
 
         for idx, x in enumerate(to_plot['x']):
             plt.errorbar(x, to_plot['y'][idx], yerr=to_plot['dy'][idx], color=errorbar_color, elinewidth=1, capsize=1)
 
     plt.clf()
-    ax = plt.gca()
-    plot_swaps_bloom_size_line(os.path.join(results_path, "worst"), 'red', "1-Pkt Flows", "darkred")
-    plot_swaps_bloom_size_line(os.path.join(results_path, "avg"), 'royalblue', "2-Pkt Flows", "blue")
-    plot_swaps_bloom_size_line(os.path.join(results_path, "best"), 'green', "8-Pkt Flows", "darkgreen")
+    plot_outoforder_table_size_line(os.path.join(results_path, "best"), 'green', "8-Pkt Flows (w/ Ordering)",
+                                    "darkgreen")
+    plot_outoforder_no_ordering_table_size_line(os.path.join(results_no_ordering_path, "best"), 'springgreen',
+                                                "8-Pkt Flows (w/o Ordering)", "springgreen")
 
     set_x_axis_table_size()
 
-    plt.xlabel('N. Bloom Table Entries')
-    plt.ylabel('N. Swaps')
-    plt.legend(loc='best', labelspacing=0.2, prop={'size': 8})
-    plt.savefig(os.path.join(figures_path, "swaps_bloom_size.pdf"), format="pdf", bbox_inches='tight')
-
-
-def plot_recirculation_bandwidth_bloom_size_figure(results_path):
-    global figures_path
-
-    def plot_recirculation_bandwidth_bloom_size_line(directory, color, label, errorbar_color):
-        to_plot = {'x': [], 'y': [], 'dy': []}
-
-        for size in sorted(map(lambda i: int(i), filter(lambda i: not i.startswith("."), os.listdir(directory)))):
-            recirc_bps = parse_tofino32p_logs(os.path.join(directory, str(size)), "RECIRC_BPS")[32768]
-            
-            values = []
-            for results in recirc_bps:
-                if results:
-                    val = list(map(lambda item: item[1] / 1000000000, results))[1:][:-1]
-                    values.append(statistics.mean(list(filter(lambda item: item > 1, val))))
-                    
-
-            to_plot['x'].append(int(size))
-            to_plot['y'].append(statistics.mean(values) if values else 0)
-            to_plot['dy'].append(statistics.stdev(values) if len(values) > 1 else 0)
-
-        plt.plot(to_plot['x'], to_plot['y'], label=label, linestyle='dashed', fillstyle='none', color=color, marker='o')
-
-        for idx, x in enumerate(to_plot['x']):
-            plt.errorbar(x, to_plot['y'][idx], yerr=to_plot['dy'][idx], color=errorbar_color, elinewidth=1, capsize=1)
-
-
-    plt.clf()
-    ax = plt.gca()
-    plot_recirculation_bandwidth_bloom_size_line(os.path.join(results_path, "worst"), 'red', "1-Pkt Flows", "darkred")
-    plot_recirculation_bandwidth_bloom_size_line(os.path.join(results_path, "avg"), 'royalblue', "2-Pkt Flows", "blue")
-    plot_recirculation_bandwidth_bloom_size_line(os.path.join(results_path, "best"), 'green', "8-Pkt Flows", "darkgreen")
-
-    ax.set_ylim([0, 260])
-    ax.set_yticks(range(0, 260, 20))
-    set_x_axis_table_size()
-
-    plt.xlabel('N. Ordering Bloom Filters Entries')
-    plt.ylabel('Recirculation Bandwidth\n[Gbps]')
-    plt.legend(loc='best', labelspacing=0.2, prop={'size': 8})
-    plt.savefig(os.path.join(figures_path, "recirc_bps_bloom_size.pdf"), format="pdf", bbox_inches='tight')
-
+    plt.xlabel('N. Cuckoo Table Entries')
+    plt.ylabel('Out-of-Order Pkts / Total Pkts [%]')
+    plt.legend(loc="best", labelspacing=0.2, prop={'size': 8})
+    plt.savefig(os.path.join(figures_path, "outoforder_table_size.pdf"), format="pdf", bbox_inches='tight')
 
 
 def set_x_axis_table_size():
@@ -888,12 +775,15 @@ def set_x_axis_table_size():
 
 if __name__ == "__main__":
     if len(sys.argv) < 6:
-        print("Usage: plot.py <table_size_results> <bloom_size_results> <throughput_results> <figures_path>")
+        print(
+            "Usage: plot.py <table_size_results> <table_size_no_ordering_results> <bloom_size_results> <throughput_results> <figures_path>"
+        )
         exit(1)
 
     results_per_table_size_path = os.path.abspath(sys.argv[1])
-    results_per_bloom_size_path = os.path.abspath(sys.argv[2])
-    results_per_throughput_path = os.path.abspath(sys.argv[3])
+    results_per_table_size_no_ordering_path = os.path.abspath(sys.argv[2])
+    results_per_bloom_size_path = os.path.abspath(sys.argv[3])
+    results_per_throughput_path = os.path.abspath(sys.argv[4])
     figures_path = os.path.abspath(sys.argv[5])
 
     os.makedirs(figures_path, exist_ok=True)
@@ -904,51 +794,48 @@ if __name__ == "__main__":
     matplotlib.rcParams['pdf.fonttype'] = 42
     matplotlib.rcParams['ps.fonttype'] = 42
 
-    plot_swaps_table_size_figure(results_per_table_size_path)
-    plot_swaps_insertions_table_size_figure(results_per_table_size_path)
-    plot_swaps_inputpkts_table_size_figure(results_per_table_size_path)
-    plot_swaps_throughput_table_size_figure(results_per_throughput_path)
-
-    plot_recirculation_bandwidth_table_size_figure(results_per_table_size_path)
-
-    plot_ips_table_size_figure(results_per_table_size_path)
-    plot_insertions_table_size_figure(results_per_table_size_path)
+    # Figure 4
     plot_ips_throughput_figure(results_per_throughput_path)
 
-    plot_recirculated_packets_figure(results_per_table_size_path, 128)
-    plot_recirculated_packets_figure(results_per_table_size_path, 256)
-    plot_recirculated_packets_figure(results_per_table_size_path, 512)
+    # Figure 5a
+    plot_recirculation_bandwidth_table_size_figure(results_per_table_size_path)
+    # Figure 5b
+    plot_swaps_insertions_table_size_figure(results_per_table_size_path)
+
+    # Figure 6
+    plot_latency_table_size_figure(results_per_table_size_path)
+
+    # Figure 7
+    plot_outoforder_table_size_figure(results_per_table_size_path, results_per_table_size_no_ordering_path)
+
+    # Figure 8a
+    plot_recirculated_packets_figure(results_per_table_size_path, 32768)
+    # Figure 8b
+    plot_latency_recirculations_figure(results_per_table_size_path, 32768)
+
+    # Additional Plots (not in the paper)
+    plot_swaps_table_size_figure(results_per_table_size_path)
+    plot_swaps_inputpkts_table_size_figure(results_per_table_size_path)
+    plot_ips_table_size_figure(results_per_table_size_path)
+    plot_insertions_table_size_figure(results_per_table_size_path)
+
     plot_recirculated_packets_figure(results_per_table_size_path, 1024)
     plot_recirculated_packets_figure(results_per_table_size_path, 2048)
     plot_recirculated_packets_figure(results_per_table_size_path, 4096)
     plot_recirculated_packets_figure(results_per_table_size_path, 8192)
     plot_recirculated_packets_figure(results_per_table_size_path, 16384)
-    plot_recirculated_packets_figure(results_per_table_size_path, 32768)
     plot_recirculated_packets_figure(results_per_table_size_path, 65536)
 
-    plot_latency_table_size_figure(results_per_table_size_path)
-    plot_percentile_latency_table_size_figure(results_per_table_size_path, "worst", "worst")
-    plot_percentile_latency_table_size_figure(results_per_table_size_path, "best", "best")
-    plot_percentile_latency_table_size_figure(results_per_table_size_path, "avg", "avg")
-
-    plot_expired_table_size_figure(results_per_table_size_path, 0)
-    plot_expired_table_size_figure(results_per_table_size_path, 1)
-    plot_expired_table_size_figure(results_per_table_size_path, 2)
-
-    plot_latency_recirculations_figure(results_per_table_size_path, 128)
-    plot_latency_recirculations_figure(results_per_table_size_path, 256)
-    plot_latency_recirculations_figure(results_per_table_size_path, 512)
     plot_latency_recirculations_figure(results_per_table_size_path, 1024)
     plot_latency_recirculations_figure(results_per_table_size_path, 2048)
     plot_latency_recirculations_figure(results_per_table_size_path, 4096)
     plot_latency_recirculations_figure(results_per_table_size_path, 8192)
     plot_latency_recirculations_figure(results_per_table_size_path, 16384)
-    plot_latency_recirculations_figure(results_per_table_size_path, 32768)
     plot_latency_recirculations_figure(results_per_table_size_path, 65536)
+
+    plot_expired_table_size_figure(results_per_table_size_path, 0)
+    plot_expired_table_size_figure(results_per_table_size_path, 1)
+    plot_expired_table_size_figure(results_per_table_size_path, 2)
 
     plot_drops_tm_table_size_figure(results_per_table_size_path)
     plot_drops_wire_table_size_figure(results_per_table_size_path)
-
-    plot_ips_bloom_size_figure(results_per_bloom_size_path)
-    plot_swaps_bloom_size_figure(results_per_bloom_size_path)
-    plot_recirculation_bandwidth_bloom_size_figure(results_per_bloom_size_path)
