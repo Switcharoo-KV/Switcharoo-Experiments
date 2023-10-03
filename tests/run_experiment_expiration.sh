@@ -40,13 +40,13 @@ echo "  Generator Rate: $rate" >> log.txt
 echo "  Table Size: 65536" >> log.txt
 echo "  Bloom Size: 65536" >> log.txt
 
-echo "$(date +'%m-%d-%y-%T') - Deleting logs from `$SWITCHAROO_TOFINO_NAME`..." >> log.txt
+echo "$(date +'%m-%d-%y-%T') - Deleting logs from $SWITCHAROO_TOFINO_NAME..." >> log.txt
 sshpass -p $TOFINO_USER_PASS ssh $TOFINO_USERNAME@$SWITCHAROO_TOFINO_NAME "sudo rm -rf $SWITCHAROO_PATH/logs/*"
 
-echo "$(date +'%m-%d-%y-%T') - Deleting logs from `$MCAST_TOFINO_NAME`..." >> log.txt
+echo "$(date +'%m-%d-%y-%T') - Deleting logs from $MCAST_TOFINO_NAME..." >> log.txt
 sshpass -p $TOFINO_USER_PASS ssh $TOFINO_USERNAME@$MCAST_TOFINO_NAME "sudo rm -rf $MULTICAST_PATH/logs/*"
 
-echo "$(date +'%m-%d-%y-%T') - Deleting fastclick logs from `$GENERATOR_SERVER_NAME`..." >> log.txt
+echo "$(date +'%m-%d-%y-%T') - Deleting fastclick logs from $GENERATOR_SERVER_NAME..." >> log.txt
 sshpass -p $SERVER_USER_PASS ssh $SERVER_USERNAME@$GENERATOR_SERVER_NAME "echo $SERVER_USER_PASS | sudo -S rm -rf $GENERATOR_PATH/logs/*"
 
 for expiration in 10000 20000 30000 40000 50000 60000 70000 80000 90000 100000
@@ -111,21 +111,21 @@ do
     mkdir -p $path/$configuration/$expiration/mcast-logs
     mkdir -p $path/$configuration/$expiration/fastclick-logs
 
-    echo "Copying `$SWITCHAROO_TOFINO_NAME` logs in $path/$configuration/$expiration" >> log.txt
+    echo "Copying $SWITCHAROO_TOFINO_NAME logs in $path/$configuration/$expiration" >> log.txt
     sshpass -p $TOFINO_USER_PASS scp -r $TOFINO_USERNAME@$SWITCHAROO_TOFINO_NAME:$SWITCHAROO_PATH/logs/* $path/$configuration/$expiration/switcharoo-logs
 
-    echo "Deleting logs from `$SWITCHAROO_TOFINO_NAME`..." >> log.txt
+    echo "Deleting logs from $SWITCHAROO_TOFINO_NAME..." >> log.txt
     sshpass -p $TOFINO_USER_PASS ssh $TOFINO_USERNAME@$SWITCHAROO_TOFINO_NAME "sudo rm -rf $SWITCHAROO_PATH/logs/*"
 
-    echo "Copying `$MCAST_TOFINO_NAME` logs in $path/$configuration/$expiration" >> log.txt
+    echo "Copying $MCAST_TOFINO_NAME logs in $path/$configuration/$expiration" >> log.txt
     sshpass -p $TOFINO_USER_PASS scp -r $TOFINO_USERNAME@$MCAST_TOFINO_NAME:$MULTICAST_PATH/logs/* $path/$configuration/$expiration/mcast-logs
 
-    echo "Deleting logs from `$MCAST_TOFINO_NAME`..." >> log.txt
+    echo "Deleting logs from $MCAST_TOFINO_NAME..." >> log.txt
     sshpass -p $TOFINO_USER_PASS ssh $TOFINO_USERNAME@$MCAST_TOFINO_NAME "sudo rm -rf $MULTICAST_PATH/logs/*"
 
-    echo "Copying `$GENERATOR_SERVER_NAME` logs in $path/$configuration/$expiration" >> log.txt
+    echo "Copying $GENERATOR_SERVER_NAME logs in $path/$configuration/$expiration" >> log.txt
     sshpass -p $SERVER_USER_PASS scp -r $SERVER_USERNAME@$GENERATOR_SERVER_NAME:$GENERATOR_PATH/logs/* $path/$configuration/$expiration/fastclick-logs
 
-    echo "Deleting logs from `$GENERATOR_SERVER_NAME`..." >> log.txt
+    echo "Deleting logs from $GENERATOR_SERVER_NAME..." >> log.txt
     sshpass -p $SERVER_USER_PASS ssh $SERVER_USERNAME@$GENERATOR_SERVER_NAME "echo $SERVER_USER_PASS | sudo -S rm -rf $GENERATOR_PATH/logs/*"
 done

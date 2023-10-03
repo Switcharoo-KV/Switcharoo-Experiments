@@ -40,13 +40,13 @@ echo "  Generator Rate: $rate" >> log.txt
 echo "  Table Size: 32768" >> log.txt
 echo "  Bloom Size: [1024, 65536]" >> log.txt
 
-echo "$(date +'%m-%d-%y-%T') - Deleting logs from `$SWITCHAROO_TOFINO_NAME`..." >> log.txt
+echo "$(date +'%m-%d-%y-%T') - Deleting logs from $SWITCHAROO_TOFINO_NAME..." >> log.txt
 sshpass -p $TOFINO_USER_PASS ssh $TOFINO_USERNAME@$SWITCHAROO_TOFINO_NAME "sudo rm -rf $SWITCHAROO_PATH/logs/*"
 
-echo "$(date +'%m-%d-%y-%T') - Deleting logs from `$MCAST_TOFINO_NAME`..." >> log.txt
+echo "$(date +'%m-%d-%y-%T') - Deleting logs from $MCAST_TOFINO_NAME..." >> log.txt
 sshpass -p $TOFINO_USER_PASS ssh $TOFINO_USERNAME@$MCAST_TOFINO_NAME "sudo rm -rf $MULTICAST_PATH/logs/*"
 
-echo "$(date +'%m-%d-%y-%T') - Deleting fastclick logs from `$GENERATOR_SERVER_NAME`..." >> log.txt
+echo "$(date +'%m-%d-%y-%T') - Deleting fastclick logs from $GENERATOR_SERVER_NAME..." >> log.txt
 sshpass -p $SERVER_USER_PASS ssh $SERVER_USERNAME@$GENERATOR_SERVER_NAME "echo $SERVER_USER_PASS | sudo -S rm -rf $GENERATOR_PATH/logs/*"
 
 for size in 1024 2048 4096 8192 16384 32768 65536
@@ -71,7 +71,7 @@ do
         sshpass -p $TOFINO_USER_PASS ssh $TOFINO_USERNAME@$MCAST_TOFINO_NAME -t "killall -9 run_switchd.sh; killall -9 run_bfshell.sh; killall -9 bfshell; sudo pkill -9 -f 'bf_switchd'"
         tmux kill-session -t switcharoo-experiments
 
-        echo "$(date +'%m-%d-%y-%T') - Size ${size} ~ Start Run ${i}" >> log.txt
+        echo "$(date +'%m-%d-%y-%T') - Bloom Table Size ${size} ~ Start Run ${i}" >> log.txt
 
         tmux kill-session -t switcharoo-experiments
         tmux new-session -d -s switcharoo-experiments
@@ -101,31 +101,31 @@ do
         sshpass -p $TOFINO_USER_PASS ssh $TOFINO_USERNAME@$MCAST_TOFINO_NAME -t "killall -9 run_switchd.sh; killall -9 run_bfshell.sh; killall -9 bfshell; sudo pkill -9 -f 'bf_switchd'"
         tmux kill-session -t switcharoo-experiments
         
-        echo "$(date +'%m-%d-%y-%T') - Size ${size} ~ End Run ${i}" >> log.txt
+        echo "$(date +'%m-%d-%y-%T') - Bloom Table Size ${size} ~ End Run ${i}" >> log.txt
 
         sleep 5
     done
-    echo "$(date +'%m-%d-%y-%T') - End Size ${size}" >> log.txt
+    echo "$(date +'%m-%d-%y-%T') - End Bloom Table Size ${size}" >> log.txt
 
     mkdir -p $path/$configuration/$size/switcharoo-logs
     mkdir -p $path/$configuration/$size/mcast-logs
     mkdir -p $path/$configuration/$size/fastclick-logs
 
-    echo "Copying `$SWITCHAROO_TOFINO_NAME` logs in $path/$configuration/$size" >> log.txt
+    echo "Copying $SWITCHAROO_TOFINO_NAME logs in $path/$configuration/$size" >> log.txt
     sshpass -p $TOFINO_USER_PASS scp -r $TOFINO_USERNAME@$SWITCHAROO_TOFINO_NAME:$SWITCHAROO_PATH/logs/* $path/$configuration/$size/switcharoo-logs
 
-    echo "Deleting logs from `$SWITCHAROO_TOFINO_NAME`..." >> log.txt
+    echo "Deleting logs from $SWITCHAROO_TOFINO_NAME..." >> log.txt
     sshpass -p $TOFINO_USER_PASS ssh $TOFINO_USERNAME@$SWITCHAROO_TOFINO_NAME "sudo rm -rf $SWITCHAROO_PATH/logs/*"
 
-    echo "Copying `$MCAST_TOFINO_NAME` logs in $path/$configuration/$size" >> log.txt
+    echo "Copying $MCAST_TOFINO_NAME logs in $path/$configuration/$size" >> log.txt
     sshpass -p $TOFINO_USER_PASS scp -r $TOFINO_USERNAME@$MCAST_TOFINO_NAME:$MULTICAST_PATH/logs/* $path/$configuration/$size/mcast-logs
 
-    echo "Deleting logs from `$MCAST_TOFINO_NAME`..." >> log.txt
+    echo "Deleting logs from $MCAST_TOFINO_NAME..." >> log.txt
     sshpass -p $TOFINO_USER_PASS ssh $TOFINO_USERNAME@$MCAST_TOFINO_NAME "sudo rm -rf $MULTICAST_PATH/logs/*"
 
-    echo "Copying `$GENERATOR_SERVER_NAME` logs in $path/$configuration/$size" >> log.txt
+    echo "Copying $GENERATOR_SERVER_NAME logs in $path/$configuration/$size" >> log.txt
     sshpass -p $SERVER_USER_PASS scp -r $SERVER_USERNAME@$GENERATOR_SERVER_NAME:$GENERATOR_PATH/logs/* $path/$configuration/$size/fastclick-logs
 
-    echo "Deleting logs from `$GENERATOR_SERVER_NAME`..." >> log.txt
+    echo "Deleting logs from $GENERATOR_SERVER_NAME..." >> log.txt
     sshpass -p $SERVER_USER_PASS ssh $SERVER_USERNAME@$GENERATOR_SERVER_NAME "echo $SERVER_USER_PASS | sudo -S rm -rf $GENERATOR_PATH/logs/*"
 done
