@@ -49,7 +49,7 @@ sshpass -p $TOFINO_USER_PASS ssh $TOFINO_USERNAME@$MCAST_TOFINO_NAME "sudo rm -r
 echo "$(date +'%m-%d-%y-%T') - Deleting fastclick logs from $GENERATOR_SERVER_NAME..." >> log.txt
 sshpass -p $SERVER_USER_PASS ssh $SERVER_USERNAME@$GENERATOR_SERVER_NAME "echo $SERVER_USER_PASS | sudo -S rm -rf $GENERATOR_PATH/logs/*"
 
-for expiration in 10000 20000 30000 40000 50000 60000 70000 80000 90000 100000
+for expiration in 10000 50000 100000 200000 500000 1000000 2000000 5000000 100000000
 do  
     echo "$(date +'%m-%d-%y-%T') - Cleaning processes..." >> log.txt
     sshpass -p $TOFINO_USER_PASS ssh $TOFINO_USERNAME@$SWITCHAROO_TOFINO_NAME -t "killall -9 run_switchd.sh; killall -9 run_bfshell.sh; killall -9 bfshell; sudo pkill -9 -f 'bf_switchd'"

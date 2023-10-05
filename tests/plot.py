@@ -1,11 +1,12 @@
-import matplotlib
-import matplotlib.pyplot as plt
-import matplotlib.ticker as ticker
-import numpy as np
 import os
 import statistics
 import sys
 from distutils.util import strtobool
+
+import matplotlib
+import matplotlib.pyplot as plt
+import matplotlib.ticker as ticker
+import numpy as np
 
 figures_path = "figures"
 
@@ -429,7 +430,7 @@ def plot_insertions_table_size_figure(results_path):
     plt.savefig(os.path.join(figures_path, "insertions_table_size.pdf"), format="pdf", bbox_inches='tight')
 
 
-def plot_ips_throughput_figure(results_path):
+def plot_ips_throughput_figure(synth_results_path, caida_results_path):
     global figures_path
 
     def plot_ips_throughput_line(directory, color, marker, label, errorbar_color):
@@ -455,11 +456,34 @@ def plot_ips_throughput_figure(results_path):
         for idx, x in enumerate(to_plot['x']):
             plt.errorbar(x, to_plot['y'][idx], yerr=to_plot['dy'][idx], color=errorbar_color, elinewidth=1, capsize=1)
 
+    def plot_ips_caida_line(directory, color, marker, label, errorbar_color):
+        to_plot = {'x': [], 'y': [], 'dy': []}
+        for mcast in sorted(map(lambda i: int(i), filter(lambda i: not i.startswith("."), os.listdir(directory)))):
+            ips = parse_tofino32p_logs(os.path.join(directory, str(mcast)), "IPS")[32768]
+
+            values = []
+            for result in ips:
+                if result:
+                    val = list(map(lambda item: item[1], result))[1:-1]
+                    values.append(statistics.mean(val) / 1000000)
+
+            to_plot['x'].append(mcast * 85)
+            to_plot['y'].append(statistics.mean(values))
+            to_plot['dy'].append(statistics.stdev(values))
+
+        plt.plot(to_plot['x'], to_plot['y'], label=label, linestyle='dashed', fillstyle='none', color=color,
+                 marker=marker)
+
+        for idx, x in enumerate(to_plot['x']):
+            plt.errorbar(x, to_plot['y'][idx], yerr=to_plot['dy'][idx], color=errorbar_color, elinewidth=1, capsize=1)
+
     plt.clf()
     ax = plt.gca()
-    plot_ips_throughput_line(os.path.join(results_path, "worst"), 'red', "o", "1-Pkt Flows", "darkred")
-    plot_ips_throughput_line(os.path.join(results_path, "avg"), 'blue', "^", "2-Pkt Flows", "darkblue")
-    plot_ips_throughput_line(os.path.join(results_path, "best"), 'green', "s", "8-Pkt Flows", "darkgreen")
+    plot_ips_throughput_line(os.path.join(synth_results_path, "worst"), 'red', "o", "1-Pkt Flows", "darkred")
+    plot_ips_throughput_line(os.path.join(synth_results_path, "avg"), 'blue', "^", "2-Pkt Flows", "darkblue")
+    plot_ips_throughput_line(os.path.join(synth_results_path, "best"), 'green', "s", "8-Pkt Flows", "darkgreen")
+
+    plot_ips_caida_line(caida_results_path, 'goldenrod', "v", "CAIDA", "darkgoldenrod")
 
     ax.set_ylim([0, 54])
     plt.yticks(range(0, 54, 5))
@@ -767,6 +791,170 @@ def plot_outoforder_table_size_figure(results_path, results_no_ordering_path):
     plt.savefig(os.path.join(figures_path, "outoforder_table_size.pdf"), format="pdf", bbox_inches='tight')
 
 
+def plot_swaps_bloom_size_figure(results_path):
+    global figures_path
+
+    def plot_swaps_bloom_size_line(directory, color, marker, label, errorbar_color):
+        to_plot = {'x': [], 'y': [], 'dy': []}
+
+        for size in sorted(map(lambda i: int(i), filter(lambda i: not i.startswith("."), os.listdir(directory)))):
+            swaps = parse_tofino32p_logs(os.path.join(directory, str(size)), "SWAPS")[32768]
+            insertions = parse_tofino32p_logs(os.path.join(directory, str(size)), "INSERTIONS")[32768]
+
+            values = []
+            for idx, value in enumerate(swaps):
+                if value:
+                    insertion_num = insertions[idx][-1][1]
+                    percentage_of_swaps = (value[-1][1] / insertion_num) * 100
+                    values.append(percentage_of_swaps)
+
+            to_plot['x'].append(size)
+            to_plot['y'].append(statistics.mean(values) if len(values) > 1 else values[0] if values else 0)
+            to_plot['dy'].append(statistics.stdev(values) if len(values) > 1 else 0)
+
+        plt.plot(to_plot['x'], to_plot['y'], label=label, linestyle='dashed', fillstyle='none', color=color,
+                 marker=marker)
+
+        for idx, x in enumerate(to_plot['x']):
+            plt.errorbar(x, to_plot['y'][idx], yerr=to_plot['dy'][idx], color=errorbar_color, elinewidth=1, capsize=1)
+
+    plt.clf()
+    ax = plt.gca()
+    plot_swaps_bloom_size_line(os.path.join(results_path, "worst"), 'red', "o", "1-Pkt Flows", "darkred")
+    plot_swaps_bloom_size_line(os.path.join(results_path, "avg"), 'royalblue', "^", "2-Pkt Flows", "blue")
+    plot_swaps_bloom_size_line(os.path.join(results_path, "best"), 'green', "s", "8-Pkt Flows", "darkgreen")
+
+    ax.yaxis.set_major_formatter(OOMFormatter(-3, "%.2f"))
+    ax.set_ylim([0, 0.0005])
+    set_x_axis_table_size()
+
+    plt.xlabel('N. Ordering Bloom Filters Entries')
+    plt.ylabel('Swaps / Insertions [%]')
+    plt.legend(loc='best', labelspacing=0.2, prop={'size': 8})
+    plt.savefig(os.path.join(figures_path, "swaps_bloom_size.pdf"), format="pdf", bbox_inches='tight')
+
+
+def plot_recirculation_bandwidth_bloom_size_figure(results_path):
+    global figures_path
+
+    def plot_recirculation_bandwidth_bloom_size_line(directory, color, label, errorbar_color):
+        to_plot = {'x': [], 'y': [], 'dy': []}
+
+        for size in sorted(map(lambda i: int(i), filter(lambda i: not i.startswith("."), os.listdir(directory)))):
+            recirc_bps = parse_tofino32p_logs(os.path.join(directory, str(size)), "RECIRC_BPS")[32768]
+
+            values = []
+            for results in recirc_bps:
+                if results:
+                    val = list(map(lambda item: item[1] / 1000000000, results))[1:][:-1]
+                    values.append(statistics.mean(list(filter(lambda item: item > 1, val))))
+
+            to_plot['x'].append(int(size))
+            to_plot['y'].append(statistics.mean(values) if values else 0)
+            to_plot['dy'].append(statistics.stdev(values) if len(values) > 1 else 0)
+
+        plt.plot(to_plot['x'], to_plot['y'], label=label, linestyle='dashed', fillstyle='none', color=color, marker='o')
+
+        for idx, x in enumerate(to_plot['x']):
+            plt.errorbar(x, to_plot['y'][idx], yerr=to_plot['dy'][idx], color=errorbar_color, elinewidth=1, capsize=1)
+
+    plt.clf()
+    ax = plt.gca()
+    plot_recirculation_bandwidth_bloom_size_line(os.path.join(results_path, "worst"), 'red', "1-Pkt Flows", "darkred")
+    plot_recirculation_bandwidth_bloom_size_line(os.path.join(results_path, "avg"), 'royalblue', "2-Pkt Flows", "blue")
+    plot_recirculation_bandwidth_bloom_size_line(os.path.join(results_path, "best"), 'green', "8-Pkt Flows",
+                                                 "darkgreen")
+
+    ax.set_ylim([0, 260])
+    ax.set_yticks(range(0, 260, 20))
+    set_x_axis_table_size()
+
+    plt.xlabel('N. Ordering Bloom Filters Entries')
+    plt.ylabel('Recirculation Bandwidth\n[Gbps]')
+    plt.legend(loc='best', labelspacing=0.2, prop={'size': 8})
+    plt.savefig(os.path.join(figures_path, "recirc_bps_bloom_size.pdf"), format="pdf", bbox_inches='tight')
+
+
+def plot_swaps_expiration_figure(results_path):
+    global figures_path
+
+    def plot_swaps_expiration_line(directory, color, marker, label, errorbar_color):
+        to_plot = {'x': [], 'y': [], 'dy': []}
+
+        for latency in sorted(map(lambda i: int(i), filter(lambda i: not i.startswith("."), os.listdir(directory)))):
+            swaps = parse_tofino32p_logs(os.path.join(directory, str(latency)), "SWAPS")[32768]
+            insertions = parse_tofino32p_logs(os.path.join(directory, str(latency)), "INSERTIONS")[32768]
+
+            values = []
+            for idx, value in enumerate(swaps):
+                if value:
+                    insertion_num = insertions[idx][-1][1]
+                    percentage_of_swaps = (value[-1][1] / insertion_num) * 100
+                    values.append(percentage_of_swaps)
+
+            to_plot['x'].append(latency / 1000)
+            to_plot['y'].append(statistics.mean(values) if len(values) > 1 else values[0] if values else 0)
+            to_plot['dy'].append(statistics.stdev(values) if len(values) > 1 else 0)
+
+        plt.plot(to_plot['x'], to_plot['y'], label=label, linestyle='dashed', fillstyle='none', color=color,
+                 marker=marker)
+
+        for idx, x in enumerate(to_plot['x']):
+            plt.errorbar(x, to_plot['y'][idx], yerr=to_plot['dy'][idx], color=errorbar_color, elinewidth=1, capsize=1)
+
+    plt.clf()
+    ax = plt.gca()
+    plot_swaps_expiration_line(os.path.join(results_path, "worst"), 'red', "o", "1-Pkt Flows", "darkred")
+    plot_swaps_expiration_line(os.path.join(results_path, "avg"), 'royalblue', "^", "2-Pkt Flows", "blue")
+    plot_swaps_expiration_line(os.path.join(results_path, "best"), 'green', "s", "8-Pkt Flows", "darkgreen")
+
+    ax.yaxis.set_major_formatter(OOMFormatter(3, "%d"))
+    plt.xscale('log', base=10)
+
+    plt.xlabel('Entry Expiration Timeout [μs]')
+    plt.ylabel('Swaps / Insertions [%]')
+    plt.legend(loc='best', labelspacing=0.2, prop={'size': 8})
+    plt.savefig(os.path.join(figures_path, "swaps_expiration.pdf"), format="pdf", bbox_inches='tight')
+
+
+def plot_recirculation_bandwidth_expiration_figure(results_path):
+    global figures_path
+
+    def plot_recirculation_bandwidth_expiration_line(directory, color, label, errorbar_color):
+        to_plot = {'x': [], 'y': [], 'dy': []}
+
+        for latency in sorted(map(lambda i: int(i), filter(lambda i: not i.startswith("."), os.listdir(directory)))):
+            recirc_bps = parse_tofino32p_logs(os.path.join(directory, str(latency)), "RECIRC_BPS")[32768]
+
+            values = []
+            for results in recirc_bps:
+                if results:
+                    val = list(map(lambda item: item[1] / 1000000000, results))[1:][:-1]
+                    values.append(statistics.mean(val))
+
+            to_plot['x'].append(latency / 1000)
+            to_plot['y'].append(statistics.mean(values) if values else 0)
+            to_plot['dy'].append(statistics.stdev(values) if len(values) > 1 else 0)
+
+        plt.plot(to_plot['x'], to_plot['y'], label=label, linestyle='dashed', fillstyle='none', color=color, marker='o')
+
+        for idx, x in enumerate(to_plot['x']):
+            plt.errorbar(x, to_plot['y'][idx], yerr=to_plot['dy'][idx], color=errorbar_color, elinewidth=1, capsize=1)
+
+    plt.clf()
+    plot_recirculation_bandwidth_expiration_line(os.path.join(results_path, "worst"), 'red', "1-Pkt Flows", "darkred")
+    plot_recirculation_bandwidth_expiration_line(os.path.join(results_path, "avg"), 'royalblue', "2-Pkt Flows", "blue")
+    plot_recirculation_bandwidth_expiration_line(os.path.join(results_path, "best"), 'green', "8-Pkt Flows",
+                                                 "darkgreen")
+
+    plt.xscale('log', base=10)
+
+    plt.xlabel('Entry Expiration Timeout [μs]')
+    plt.ylabel('Recirculation Bandwidth\n[Gbps]')
+    plt.legend(loc='best', labelspacing=0.2, prop={'size': 8})
+    plt.savefig(os.path.join(figures_path, "recirc_bps_expiration.pdf"), format="pdf", bbox_inches='tight')
+
+
 def set_x_axis_table_size():
     plt.xscale('log', base=2)
     plt.xticks([1024, 2048, 4096, 8192, 16336, 32768, 65536],
@@ -774,9 +962,9 @@ def set_x_axis_table_size():
 
 
 if __name__ == "__main__":
-    if len(sys.argv) < 6:
+    if len(sys.argv) != 8:
         print(
-            "Usage: plot.py <table_size_results> <table_size_no_ordering_results> <bloom_size_results> <throughput_results> <figures_path>"
+            "Usage: plot.py <table_size_results> <table_size_no_ordering_results> <bloom_size_results> <throughput_results> <expiration_results> <caida_results> <figures_path>"
         )
         exit(1)
 
@@ -784,7 +972,9 @@ if __name__ == "__main__":
     results_per_table_size_no_ordering_path = os.path.abspath(sys.argv[2])
     results_per_bloom_size_path = os.path.abspath(sys.argv[3])
     results_per_throughput_path = os.path.abspath(sys.argv[4])
-    figures_path = os.path.abspath(sys.argv[5])
+    results_per_expiration_path = os.path.abspath(sys.argv[5])
+    results_caida_path = os.path.abspath(sys.argv[6])
+    figures_path = os.path.abspath(sys.argv[7])
 
     os.makedirs(figures_path, exist_ok=True)
 
@@ -795,7 +985,7 @@ if __name__ == "__main__":
     matplotlib.rcParams['ps.fonttype'] = 42
 
     # Figure 4
-    plot_ips_throughput_figure(results_per_throughput_path)
+    plot_ips_throughput_figure(results_per_throughput_path, results_caida_path)
 
     # Figure 5a
     plot_recirculation_bandwidth_table_size_figure(results_per_table_size_path)
@@ -812,6 +1002,16 @@ if __name__ == "__main__":
     plot_recirculated_packets_figure(results_per_table_size_path, 32768)
     # Figure 8b
     plot_latency_recirculations_figure(results_per_table_size_path, 32768)
+
+    # Figure 9a
+    plot_recirculation_bandwidth_bloom_size_figure(results_per_bloom_size_path)
+    # Figure 9b
+    plot_swaps_bloom_size_figure(results_per_bloom_size_path)
+
+    # Figure 10a
+    plot_swaps_expiration_figure(results_per_expiration_path)
+    # Figure 10b
+    plot_recirculation_bandwidth_expiration_figure(results_per_expiration_path)
 
     # Additional Plots (not in the paper)
     plot_swaps_table_size_figure(results_per_table_size_path)

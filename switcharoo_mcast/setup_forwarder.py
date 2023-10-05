@@ -3,7 +3,7 @@ import logging
 import sys
 import time
 
-p4 = bfrt.switcharoo_mcast
+p4 = bfrt.switcharoo_forwarder
 
 PIPE_NUM = 0
 
@@ -95,54 +95,6 @@ def port_stats_timer():
     threading.Timer(1, port_stats_timer).start()
 
 
-def set_worst():
-    global bfrt
-
-    bfrt.switcharoo_mcast.pipe.Ingress.base_flow_ip.mod(f1=0x01000001, REGISTER_INDEX=0)
-    bfrt.switcharoo_mcast.pipe.Ingress.base_flow_ip_index.mod(f1=0, REGISTER_INDEX=0)
-    bfrt.switcharoo_mcast.pipe.Ingress.number_of_ip.mod(f1=65535, REGISTER_INDEX=0)
-    bfrt.switcharoo_mcast.pipe.Ingress.n_packets_per_flow.mod(f1=1, REGISTER_INDEX=0)
-    bfrt.switcharoo_mcast.pipe.Ingress.flow_packet_counter.mod(f1=1, REGISTER_INDEX=0)
-    bfrt.switcharoo_mcast.pipe.Ingress.base_port_flow.mod(f1=1, REGISTER_INDEX=0)
-    bfrt.switcharoo_mcast.pipe.Ingress.port_flow.mod(f1=0, REGISTER_INDEX=0)
-    bfrt.switcharoo_mcast.pipe.Ingress.max_port.mod(f1=65535, REGISTER_INDEX=0)
-    bfrt.switcharoo_mcast.pipe.Ingress.consecutive_flows_number.mod(f1=1, REGISTER_INDEX=0)
-    bfrt.switcharoo_mcast.pipe.Ingress.flows_repetition.mod(f1=1, REGISTER_INDEX=0)
-    bfrt.switcharoo_mcast.pipe.Ingress.flows_repetition_index.mod(f1=1, REGISTER_INDEX=0)
-
-
-def set_avg():
-    global bfrt
-
-    bfrt.switcharoo_mcast.pipe.Ingress.base_flow_ip.mod(f1=0x01000001, REGISTER_INDEX=0)
-    bfrt.switcharoo_mcast.pipe.Ingress.base_flow_ip_index.mod(f1=0, REGISTER_INDEX=0)
-    bfrt.switcharoo_mcast.pipe.Ingress.number_of_ip.mod(f1=65535, REGISTER_INDEX=0)
-    bfrt.switcharoo_mcast.pipe.Ingress.n_packets_per_flow.mod(f1=1, REGISTER_INDEX=0)
-    bfrt.switcharoo_mcast.pipe.Ingress.flow_packet_counter.mod(f1=1, REGISTER_INDEX=0)
-    bfrt.switcharoo_mcast.pipe.Ingress.base_port_flow.mod(f1=1, REGISTER_INDEX=0)
-    bfrt.switcharoo_mcast.pipe.Ingress.port_flow.mod(f1=0, REGISTER_INDEX=0)
-    bfrt.switcharoo_mcast.pipe.Ingress.max_port.mod(f1=65535, REGISTER_INDEX=0)
-    bfrt.switcharoo_mcast.pipe.Ingress.consecutive_flows_number.mod(f1=125, REGISTER_INDEX=0)
-    bfrt.switcharoo_mcast.pipe.Ingress.flows_repetition.mod(f1=2, REGISTER_INDEX=0)
-    bfrt.switcharoo_mcast.pipe.Ingress.flows_repetition_index.mod(f1=1, REGISTER_INDEX=0)
-
-
-def set_best():
-    global bfrt
-
-    bfrt.switcharoo_mcast.pipe.Ingress.base_flow_ip.mod(f1=0x01000001, REGISTER_INDEX=0)
-    bfrt.switcharoo_mcast.pipe.Ingress.base_flow_ip_index.mod(f1=0, REGISTER_INDEX=0)
-    bfrt.switcharoo_mcast.pipe.Ingress.number_of_ip.mod(f1=65535, REGISTER_INDEX=0)
-    bfrt.switcharoo_mcast.pipe.Ingress.n_packets_per_flow.mod(f1=2, REGISTER_INDEX=0)
-    bfrt.switcharoo_mcast.pipe.Ingress.flow_packet_counter.mod(f1=1, REGISTER_INDEX=0)
-    bfrt.switcharoo_mcast.pipe.Ingress.base_port_flow.mod(f1=1, REGISTER_INDEX=0)
-    bfrt.switcharoo_mcast.pipe.Ingress.port_flow.mod(f1=0, REGISTER_INDEX=0)
-    bfrt.switcharoo_mcast.pipe.Ingress.max_port.mod(f1=65535, REGISTER_INDEX=0)
-    bfrt.switcharoo_mcast.pipe.Ingress.consecutive_flows_number.mod(f1=125, REGISTER_INDEX=0)
-    bfrt.switcharoo_mcast.pipe.Ingress.flows_repetition.mod(f1=4, REGISTER_INDEX=0)
-    bfrt.switcharoo_mcast.pipe.Ingress.flows_repetition_index.mod(f1=1, REGISTER_INDEX=0)
-
-
 lab_path = os.path.join(os.environ['HOME'], "labs/switcharoo_mcast")
 
 # Setup Logging
@@ -156,7 +108,7 @@ logging.basicConfig(
 
 (year, month, day, hour, minutes, _, _, _, _) = time.localtime(time.time())
 log_path = os.path.join(lab_path, "logs")
-log_timestamped_name = '64p-log-%d-%s-%s_%s-%s' % (
+log_timestamped_name = 'log-%d-%s-%s_%s-%s' % (
     year, str(month).zfill(2), str(day).zfill(2), str(hour).zfill(2), str(minutes).zfill(2))
 os.makedirs(log_path, exist_ok=True)
 file_handler = logging.FileHandler(os.path.join(log_path, "%s.log" % log_timestamped_name))
@@ -165,7 +117,5 @@ logging.root.addHandler(file_handler)
 
 # Run configurations
 run_pd_rpc(os.path.join(lab_path, "run_pd_rpc/setup.py"))
-
-set_best()
 
 port_stats_timer()

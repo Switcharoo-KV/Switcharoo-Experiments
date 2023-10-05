@@ -143,3 +143,12 @@ sh run_experiment_expiration.sh -p all-expirations/ -c avg -r 2600000
 sleep 5
 sh run_experiment_expiration.sh -p all-expirations/ -c best -r 2600000
 sleep 5
+
+sh run_experiment_caida.sh -p all-caida/ -m 1 -s 32768
+sleep 5
+sh run_experiment_caida.sh -p all-caida/ -m 2 -s 32768
+sleep 5
+sh run_experiment_caida.sh -p all-caida/ -m 3 -s 32768
+sleep 5
+sh run_experiment_caida.sh -p all-caida/ -m 4 -s 32768
+sleep 5
