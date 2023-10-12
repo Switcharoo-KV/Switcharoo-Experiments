@@ -992,26 +992,26 @@ if __name__ == "__main__":
     # Figure 5b
     plot_swaps_insertions_table_size_figure(results_per_table_size_path)
 
-    # Figure 6
-    plot_latency_table_size_figure(results_per_table_size_path)
+    # Figure 6a
+    plot_swaps_expiration_figure(results_per_expiration_path)
+    # Figure 6b
+    plot_recirculation_bandwidth_expiration_figure(results_per_expiration_path)
 
-    # Figure 7
-    plot_outoforder_table_size_figure(results_per_table_size_path, results_per_table_size_no_ordering_path)
-
-    # Figure 8a
-    plot_recirculated_packets_figure(results_per_table_size_path, 32768)
-    # Figure 8b
-    plot_latency_recirculations_figure(results_per_table_size_path, 32768)
-
-    # Figure 9a
+    # Figure 7a
     plot_recirculation_bandwidth_bloom_size_figure(results_per_bloom_size_path)
-    # Figure 9b
+    # Figure 7b
     plot_swaps_bloom_size_figure(results_per_bloom_size_path)
 
+    # Figure 8
+    plot_latency_table_size_figure(results_per_table_size_path)
+
+    # Figure 9
+    plot_outoforder_table_size_figure(results_per_table_size_path, results_per_table_size_no_ordering_path)
+
     # Figure 10a
-    plot_swaps_expiration_figure(results_per_expiration_path)
+    plot_recirculated_packets_figure(results_per_table_size_path, 32768)
     # Figure 10b
-    plot_recirculation_bandwidth_expiration_figure(results_per_expiration_path)
+    plot_latency_recirculations_figure(results_per_table_size_path, 32768)
 
     # Additional Plots (not in the paper)
     plot_swaps_table_size_figure(results_per_table_size_path)
