@@ -142,5 +142,4 @@ After you gathered all the results, you can plot them by running the following c
 python3 plot.py <table_size_results> <table_size_no_ordering_results> <bloom_size_results> <throughput_results> <figures_path>
 ```
 
-**NOTE**: For Figure 7 (`<table_size_no_ordering_results>`), you need to recompile Switcharoo by disabling the ordering data structures in `bloom_pipe/bloom.p4` and only keep the forwarding logic for swaps and final packets.
-Please send an email to the authors if you are interested in performing this experiment.
+**NOTE**: For Figure 7 (`<table_size_no_ordering_results>`), you need to recompile Switcharoo by replacing the `bloom_pipe/bloom.p4` with the `bloom_pipe/bloom_no_ordering.p4` and recompile the program.
