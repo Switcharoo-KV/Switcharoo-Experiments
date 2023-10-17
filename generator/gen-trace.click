@@ -14,14 +14,14 @@ define($rxverbose 99)
 
 elementclass MyNull { [0-7] => [0-7]; };
 
-fdIN0 :: FromDump(/mnt/traces/caida-18/caida18-32x.forcedudp.pcap-1, STOP true, TIMING 1, TIMING_FNT "100", END_AFTER 0, ACTIVE true, BURST 1);
-fdIN1 :: FromDump(/mnt/traces/caida-18/caida18-32x.forcedudp.pcap-2, STOP true, TIMING 1, TIMING_FNT "100", END_AFTER 0, ACTIVE true, BURST 1);
-fdIN2 :: FromDump(/mnt/traces/caida-18/caida18-32x.forcedudp.pcap-3, STOP true, TIMING 1, TIMING_FNT "100", END_AFTER 0, ACTIVE true, BURST 1);
-fdIN3 :: FromDump(/mnt/traces/caida-18/caida18-32x.forcedudp.pcap-4, STOP true, TIMING 1, TIMING_FNT "100", END_AFTER 0, ACTIVE true, BURST 1);
-fdIN4 :: FromDump(/mnt/traces/caida-18/caida18-32x.forcedudp.pcap-5, STOP true, TIMING 1, TIMING_FNT "100", END_AFTER 0, ACTIVE true, BURST 1);
-fdIN5 :: FromDump(/mnt/traces/caida-18/caida18-32x.forcedudp.pcap-6, STOP true, TIMING 1, TIMING_FNT "100", END_AFTER 0, ACTIVE true, BURST 1);
-fdIN6 :: FromDump(/mnt/traces/caida-18/caida18-32x.forcedudp.pcap-7, STOP true, TIMING 1, TIMING_FNT "100", END_AFTER 0, ACTIVE true, BURST 1);
-fdIN7 :: FromDump(/mnt/traces/caida-18/caida18-32x.forcedudp.pcap-8, STOP true, TIMING 1, TIMING_FNT "100", END_AFTER 0, ACTIVE true, BURST 1);
+fdIN0 :: FromDump(/path/to/caida-trace/caida18.pcap-1, STOP true, TIMING 1, TIMING_FNT "100", END_AFTER 0, ACTIVE true, BURST 1);
+fdIN1 :: FromDump(/path/to/caida-trace/caida18.pcap-2, STOP true, TIMING 1, TIMING_FNT "100", END_AFTER 0, ACTIVE true, BURST 1);
+fdIN2 :: FromDump(/path/to/caida-trace/caida18.pcap-3, STOP true, TIMING 1, TIMING_FNT "100", END_AFTER 0, ACTIVE true, BURST 1);
+fdIN3 :: FromDump(/path/to/caida-trace/caida18.pcap-4, STOP true, TIMING 1, TIMING_FNT "100", END_AFTER 0, ACTIVE true, BURST 1);
+fdIN4 :: FromDump(/path/to/caida-trace/caida18.pcap-5, STOP true, TIMING 1, TIMING_FNT "100", END_AFTER 0, ACTIVE true, BURST 1);
+fdIN5 :: FromDump(/path/to/caida-trace/caida18.pcap-6, STOP true, TIMING 1, TIMING_FNT "100", END_AFTER 0, ACTIVE true, BURST 1);
+fdIN6 :: FromDump(/path/to/caida-trace/caida18.pcap-7, STOP true, TIMING 1, TIMING_FNT "100", END_AFTER 0, ACTIVE true, BURST 1);
+fdIN7 :: FromDump(/path/to/caida-trace/caida18.pcap-8, STOP true, TIMING 1, TIMING_FNT "100", END_AFTER 0, ACTIVE true, BURST 1);
 
 tdIN :: ToDPDKDevice(0, BLOCKING true, BURST $bout, VERBOSE $txverbose, IQUEUE $bout, NDESC 0, TCO 0)
 
