@@ -14,7 +14,39 @@ The experiments require two Tofino switches and an external server that acts as 
 
 The traffic generator uses [FastClick](https://github.com/tbarbette/fastclick), in particular, it needs some additional elements to be compiled inside the vanilla version.
 
-After pulling the FastClick repository, copy the `generator/elements` folder inside the root folder of FastClick and then build the project. You can find additional information on how to build it on the [official repository](https://github.com/tbarbette/fastclick).
+We used **Ubuntu 20.04.4 LTS** as the Operating System on the server.
+
+First compile and install DPDK, following [this tutorial](https://doc.dpdk.org/guides/prog_guide/build-sdk-meson.html). We used **DPDK 21.08.0**, and it is the only tested version.
+
+After installing DPDK, pull both this repository and FastClick:
+
+```bash
+$ git clone https://github.com/Switcharoo-P4/Switcharoo-Experiments.git
+$ git clone https://github.com/tbarbette/fastclick.git
+```
+
+Checkout to the specific FastClick commit ([cf0f2b507c](https://github.com/tbarbette/fastclick/tree/cf0f2b507c6fcb1e4f99a834912f62a262fb8e9c)):
+```bash
+cd fastclick
+git checkout cf0f2b507c6fcb1e4f99a834912f62a262fb8e9c
+```
+Enter the `Switcharoo-Experiments` folder and copy the `generator/fastclick/elements` folder inside the root folder of FastClick, where there is already an `elements` folder. Confirm to merge the two.
+
+Install FastClick's dependencies by running the `deps.sh` script.
+
+In our testbed, FastClick has been configured with the following command:
+```bash
+$ cd fastclick
+$ PKG_CONFIG_PATH=/path/to/dpdk/install/lib/x86_64-linux-gnu/pkgconfig ./configure --enable-dpdk --enable-intel-cpu --verbose --enable-select=poll "CFLAGS=-O3" "CXXFLAGS=-std=c++17 -O3" --disable-dynamic-linking --enable-poll --enable-bound-port-transfer --enable-local --enable-flow --disable-task-stats --enable-cpu-load --enable-dpdk-packet --disable-clone --disable-dpdk-softqueue --enable-research --disable-sloppy --enable-user-timestamp
+```
+Replace the `PKG_CONFIG_PATH` with the path of your DPDK installation. 
+
+Build the project:
+```bash
+$ make
+```
+
+**NOTE**: In order to run the CAIDA experiment, you need a CAIDA trace locally stored on the server. Providing such trace is out of the scope of this repository. However, if you have the trace, you need the change the trace path in the `generator/gen-trace.click` file (from line 17 to line 24). 
 
 ### Multicast P4 Program
 
@@ -24,6 +56,8 @@ To build the code, use the following command:
 ```bash 
 ./p4_build.sh /path/to/switcharoo_mcast.p4
 ```
+
+`switcharoo_mcast.p4` has been tested on **SDE 9.7.0**.
 
 ### Tests
 
@@ -36,13 +70,25 @@ python3 -m pip install matplotlib
 
 ## Configuration
 
-### Change the FastClick directory
+### Change the FastClick configuration
 
-You need to specify the FastClick installation directory in the `gen-rated-mt-lat.sh` file.
+You need to specify the FastClick installation directory in the `gen-rated-mt-lat.sh` and `gen-trace.sh` files.
+Also, you need to specify the interface PCI address of the NIC port to use to send traffic.
 
-Open the `gen-rated-mt-lat.sh` file with an editor and change the `/path/to/fastclick` with the root folder of the compiled FastClick.
+Open the `gen-*.sh` files with an editor and change the `/path/to/fastclick` with the root folder of the compiled FastClick.
+To change the port, replace `-a 3b:00.1` with the interface PCI address of your NIC port.
+
+FastClick is started using 16 threads, but the generator scripts only require 4 threads.
+You can change the number of threads in the `gen-*.sh` files by changing the `-l 0-15` parameter to a different range.
 
 ### Change Ports in `switcharoo_mcast`
+
+<p align="center">
+    <img src=img/testbed.png?raw=true" alt="Testbed" />
+</p>
+
+The figure above depicts the Switcharoo's testbed with the associated port names.
+For more information about the Switcharoo Tofino ports, please refer to the [dedicated repository](https://github.com/Switcharoo-P4/Switcharoo-P4).
 
 To change the ports in the `switcharoo_mcast` program, you need to:
 - Change the `switcharoo_mcast.p4` defines:
