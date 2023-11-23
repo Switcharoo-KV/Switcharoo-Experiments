@@ -1,4 +1,9 @@
 # Switcharoo Experiments
+
+<p align="right">
+    <a href="https://doi.org/10.5281/zenodo.10184767"><img src="https://zenodo.org/badge/DOI/10.5281/zenodo.10184767.svg" alt="DOI"></a>
+</p>
+
 This repository contains the evaluation scripts used to measure Switcharoo performance.
 
 ## Repository Organization
